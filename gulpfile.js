@@ -1,10 +1,13 @@
 const gulp = require('gulp');
-const browserSync = require('browser-sync')//.create;
+const browserSync = require('browser-sync');
 const pug = require('gulp-pug');
 const sass = require('gulp-sass');
 const spritesmith = require('gulp.spritesmith');
 const rimraf = require('rimraf');
 const rename = require("gulp-rename");
+const uglify = require('gulp-uglify');
+const concat = require('gulp-concat');
+const sourcemaps = require('gulp-sourcemaps');
 
 /* ------server--------*/
 gulp.task('server', function () {
@@ -36,9 +39,23 @@ gulp.task('styles:compile', function () {
         .pipe(gulp.dest('build/css'));
 });
 
+/* -------js------- */
+gulp.task('js', function () {
+    return gulp.src([
+            'source/js/form.js',
+            'source/js/navigation.js',
+            'source/js/main.js'
+        ])
+        .pipe(sourcemaps.init())
+        .pipe(concat('main.min.js'))
+        .pipe(uglify())
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest('build/js'))
+});
+
 /* -------sprites------- */
 gulp.task('sprite', function (cb) {
-    var spriteData = gulp.src('source/images/icons/*.png').pipe(spritesmith({
+    let spriteData = gulp.src('source/images/icons/*.png').pipe(spritesmith({
         imgName: 'sprite.png',
         imgPath: '../images/sprite.png',
         cssName: 'sprite.scss'
@@ -72,11 +89,12 @@ gulp.task('copy', gulp.parallel('copy:fonts', 'copy:images'));
 gulp.task('watch', function (done) {
     gulp.watch('source/template/**/*.pug', gulp.series('templates:compile'));
     gulp.watch('source/styles/**/*.scss', gulp.series('styles:compile'));
+    gulp.watch('source/js/**/*.js', gulp.series('js'));
     done();
 });
 
 gulp.task('default', gulp.series(
     'clean',
-    gulp.parallel('templates:compile', 'styles:compile', 'sprite', 'copy'),
+    gulp.parallel('templates:compile', 'styles:compile', 'js', 'sprite', 'copy'),
     gulp.parallel('watch', 'server')
-))
+));

@@ -30,6 +30,8 @@
 
   .arrow-down {
     @include centerer-xy();
+    padding: 20px;
+    color: #ffffff;
 
     .fa {
       font-size: 3rem;
